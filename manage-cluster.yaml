@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: astra-manage-cluster
+spec:
+  template:
+    spec:
+      volumes:
+        - name: astra-control-config
+          secret:
+            secretName: astra-control-config
+        - name: user-kube-config
+          secret:
+            secretName: user-kube-config
+      containers:
+      - name: alpine-actoolkit
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - >
+          apk add py3-pip jq yq &&
+          python3 -m pip install --upgrade pip &&
+          python3 -m pip install actoolkit==2.5.0 &&
+          CLUSTERNAME=$(yq '.clusters[0].name' config) &&
+          actoolkit create cluster /etc/kubeconfig/config &&
+          for i in `actoolkit -o json list clusters -f $CLUSTERNAME | jq -r '.items[].id'`;
+          do
+            echo actoolkit: managing cluster $CLUSTERNAME;
+            actoolkit manage cluster $i;
+          done
+        volumeMounts:
+          - mountPath: /etc/kubeconfig
+            name: user-kube-config
+            readOnly: true
+          - mountPath: /etc/astra-toolkits
+            name: astra-control-config
+            readOnly: true
+      restartPolicy: Never
+  backoffLimit: 1
