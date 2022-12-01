@@ -22,7 +22,7 @@ spec:
           apk add py3-pip jq yq &&
           python3 -m pip install --upgrade pip &&
           python3 -m pip install actoolkit==2.5.0 &&
-          CLUSTERNAME=$(yq '.clusters[0].name' config) &&
+          CLUSTERNAME=$(yq '.clusters[0].name' /etc/kubeconfig/config) &&
           actoolkit create cluster /etc/kubeconfig/config &&
           for i in `actoolkit -o json list clusters -f $CLUSTERNAME | jq -r '.items[].id'`;
           do
