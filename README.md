@@ -1,11 +1,27 @@
 # README
 
+## Create Astra Control Config YAML
+
+Click the user icon in the upper right-hand corner, then choose **API Access** from the drop-down menu which appears.
+
+![API Access](img/api-access.png)
+
+Click the **Generate API token** button, in the pop-up that appears, optionally name the token, and then copy the generated value.
+
+![Generate Token](img/generate-token.png)
+
+Within the `config.yaml` file, replace `<paste-bearer-token-here>` with the token copied in the previous step.
+
+## Create Kubernetes Secrets
+
 Create the Astra Control credential secret and the user kubeconfig secret on the master cluster:
 
 ```text
-kubectl create secret generic astra-control-config --from-file=/Users/mhaigh/.config/astra-toolkits/config.yaml
+kubectl create secret generic astra-control-config --from-file=config.yaml
 kubectl create secret generic user-kube-config --from-file=config
 ```
+
+## Create Kubernetes Job
 
 Apply the Kubernetes job which creates the kubeconfig credential, and then manages the cluster:
 
